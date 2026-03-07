@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Monitor Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #000000);
+            --tg-button: var(--tg-theme-button-color, #667eea);
+        }
+        body { 
+            background: var(--tg-bg); 
+            color: var(--tg-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { background: var(--tg-theme-secondary-bg-color, #f5f5f5); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .tab { padding: 12px; text-align: center; border-radius: 12px; }
+        .tab-active { background: var(--tg-button); color: white; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const MOCK_DATA = {
+            user: { balance: 150.00, wallet: 'EQD...xxxx' },
+            markets: [
+                { name: 'Tonnel', floor: 8.50, change: 5.2, volume: 1250, color: '#2196F3' },
+                { name: 'Portals', floor: 9.20, change: -2.1, volume: 890, color: '#9C27B0' },
+                { name: 'MRKT', floor: 7.80, change: 12.5, volume: 2100, color: '#FF9800' }
+            ],
+            sniper: [
+                { name: 'Toy Bear', number: '#123', price: 6.50, floor: 8.50, discount: 23.5, url: '#' },
+                { name: 'Skull Flower', number: '#9220', price: 15.00, floor: 18.50, discount: 18.9, url: '#' }
+            ],
+            sales: [
+                { name: 'Dolphin', price: 15.5, time: '12:30' },
+                { name: 'Cat', price: 22.0, time: '12:28' },
+                { name: 'Bear', price: 8.9, time: '12:25' }
+            ],
+            portfolio: [
+                { name: 'Toy Bear', profit: 1.8, roi: 17.1 },
+                { name: 'Panda', profit: -0.5, roi: -6.3 },
+                { name: 'Skull Flower', profit: 3.5, roi: 23.3 }
+            ],
+            commands: [
+                '/start - Запустить', '/help - Справка', '/webapp - Dashboard',
+                '/wallet - Кошелёк', '/portfolio - Портфель', '/stats - Статистика',
+                '/top - ТОП арбитражей', '/sales - Продажи', '/sniper - SNIPER',
+                '/target_num - Номера', '/provenance - История', '/getauth - Auth'
+            ]
+        };
+
+        let activeTab = 'home';
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (activeTab === 'home') {
+                app.innerHTML = `
+                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
+                        <h1 class="text-2xl font-bold mb-2">💰 Баланс</h1>
+                        <p class="text-4xl font-bold">${MOCK_DATA.user.balance.toFixed(2)} TON</p>
+                        <p class="text-sm opacity-80 mt-2">👛 ${MOCK_DATA.user.wallet}</p>
+                    </div>
+                    
+                    <div class="px-4">
+                        <h2 class="font-bold text-lg mb-3">🏪 Маркеты</h2>
+                        ${MOCK_DATA.markets.map(m => `
+                            <div class="card">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-bold">${m.name}</p>
+                                        <p class="text-sm opacity-60">Floor Price</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xl font-bold">${m.floor.toFixed(2)} TON</p>
+                                        <p class="text-sm ${m.change >= 0 ? 'text-green-500' : 'text-red-500'}">
+                                            ${m.change >= 0 ? '↑' : '↓'} ${Math.abs(m.change)}%
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (activeTab === 'sniper') {
+                app.innerHTML = `
+                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
+                        <h1 class="text-2xl font-bold">🚨 SNIPER</h1>
+                        <p class="text-sm opacity-80">Подарки ниже floor</p>
+                    </div>
+                    <div class="px-4">
+                        ${MOCK_DATA.sniper.map(s => `
+                            <div class="card border-l-4 border-red-500">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-bold">${s.name} ${s.number}</p>
+                                        <p class="text-sm opacity-60">${s.price.toFixed(2)} TON</p>
+                                    </div>
+                                    <div class="text-right text-red-500">
+                                        <p class="font-bold">-${s.discount}%</p>
+                                        <p class="text-xs">ниже floor</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (activeTab === 'sales') {
+                app.innerHTML = `
+                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
+                        <h1 class="text-2xl font-bold">💰 Продажи</h1>
+                        <p class="text-sm opacity-80">Последние транзакции</p>
+                    </div>
+                    <div class="px-4">
+                        ${MOCK_DATA.sales.map(s => `
+                            <div class="card flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">${s.name}</p>
+                                    <p class="text-sm opacity-60">${s.time}</p>
+                                </div>
+                                <p class="font-bold text-lg">${s.price.toFixed(2)} TON</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (activeTab === 'portfolio') {
+                const totalProfit = MOCK_DATA.portfolio.reduce((sum, p) => sum + p.profit, 0);
+                app.innerHTML = `
+                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
+                        <h1 class="text-2xl font-bold">📂 Портфель</h1>
+                        <p class="text-sm opacity-80">Прибыль: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} TON</p>
+                    </div>
+                    <div class="px-4">
+                        ${MOCK_DATA.portfolio.map(p => `
+                            <div class="card">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-bold">${p.name}</p>
+                                        <p class="text-sm opacity-60">ROI: ${p.roi}%</p>
+                                    </div>
+                                    <p class="font-bold ${p.profit >= 0 ? 'text-green-500' : 'text-red-500'}">
+                                        ${p.profit >= 0 ? '+' : ''}${p.profit.toFixed(2)} TON
+                                    </p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (activeTab === 'help') {
+                app.innerHTML = `
+                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
+                        <h1 class="text-2xl font-bold">📋 Помощь</h1>
+                        <p class="text-sm opacity-80">Все команды бота</p>
+                    </div>
+                    <div class="px-4">
+                        <div class="card">
+                            ${MOCK_DATA.commands.map(c => `
+                                <div class="py-2 border-b border-white/10 last:border-0">
+                                    <code class="text-blue-500 font-bold">${c.split(' - ')[0]}</code>
+                                    <span class="opacity-80 ml-2">${c.split(' - ')[1]}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render tabs
+            const tabs = document.getElementById('tabs');
+            tabs.innerHTML = `
+                <button onclick="setTab('home')" class="tab flex-1 ${activeTab === 'home' ? 'tab-active' : ''}">📊</button>
+                <button onclick="setTab('sniper')" class="tab flex-1 ${activeTab === 'sniper' ? 'tab-active' : ''}">🚨</button>
+                <button onclick="setTab('sales')" class="tab flex-1 ${activeTab === 'sales' ? 'tab-active' : ''}">💰</button>
+                <button onclick="setTab('portfolio')" class="tab flex-1 ${activeTab === 'portfolio' ? 'tab-active' : ''}">📂</button>
+                <button onclick="setTab('help')" class="tab flex-1 ${activeTab === 'help' ? 'tab-active' : ''}">📋</button>
+            `;
+        }
+
+        function setTab(tab) {
+            activeTab = tab;
+            render();
+        }
+
+        // Initial render
+        render();
+
+        // Create tabs at bottom
+        const tabsDiv = document.createElement('div');
+        tabsDiv.id = 'tabs';
+        tabsDiv.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--tg-bg); border-top: 1px solid rgba(0,0,0,0.1); padding: 8px;';
+        document.body.appendChild(tabsDiv);
+    </script>
+</body>
+</html>
