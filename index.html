@@ -1,205 +1,1135 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gift Monitor Dashboard</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --tg-bg: var(--tg-theme-bg-color, #ffffff);
-            --tg-text: var(--tg-theme-text-color, #000000);
-            --tg-button: var(--tg-theme-button-color, #667eea);
-        }
-        body { 
-            background: var(--tg-bg); 
-            color: var(--tg-text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card { background: var(--tg-theme-secondary-bg-color, #f5f5f5); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-        .tab { padding: 12px; text-align: center; border-radius: 12px; }
-        .tab-active { background: var(--tg-button); color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Gift Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1117;--bg2:#141720;--sf:rgba(255,255,255,.055);--sf2:rgba(255,255,255,.03);
+  --bd:rgba(255,255,255,.09);--bd2:rgba(255,255,255,.05);
+  --mint:#2dffa0;--mint2:#00e87a;--rose:#ff5e7a;--amber:#ffb347;--sky:#4db8ff;--lav:#b47aff;
+  --t1:#f0f2f8;--t2:#8b91a8;--t3:#484f66;
+  --f:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --sab:env(safe-area-inset-bottom,0px);
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;
+}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:
+  radial-gradient(ellipse 60% 50% at 15% 20%,rgba(45,255,160,.06) 0%,transparent 70%),
+  radial-gradient(ellipse 50% 40% at 85% 80%,rgba(180,122,255,.07) 0%,transparent 70%),
+  radial-gradient(ellipse 40% 35% at 60% 10%,rgba(77,184,255,.05) 0%,transparent 70%)}
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;background:rgba(15,17,23,.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd2)}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-gem{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--mint),var(--mint2));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 18px rgba(45,255,160,.35);animation:gg 3s ease-in-out infinite}
+@keyframes gg{0%,100%{box-shadow:0 0 18px rgba(45,255,160,.35)}50%{box-shadow:0 0 28px rgba(45,255,160,.55)}}
+.hdr-name{font-size:17px;font-weight:700;letter-spacing:-.4px}
+.hdr-name span{color:var(--mint)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.hdr-upd{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.orb{width:10px;height:10px;border-radius:50%;background:var(--mint);animation:op 2.5s ease-in-out infinite}
+.orb.off{background:var(--rose);animation:or2 2.5s ease-in-out infinite}
+.orb.loading{background:var(--amber);animation:or2 1s ease-in-out infinite}
+@keyframes op{0%,100%{box-shadow:0 0 0 0 rgba(45,255,160,.4)}50%{box-shadow:0 0 0 6px rgba(45,255,160,0)}}
+@keyframes or2{0%,100%{box-shadow:0 0 0 0 rgba(255,94,122,.4)}50%{box-shadow:0 0 0 6px rgba(255,94,122,0)}}
+
+/* PAGES */
+.page{display:none;padding:16px 16px calc(76px + var(--sab) + 8px);animation:pi .2s ease}
+.page.on{display:block}
+@keyframes pi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r20);padding:18px;margin-bottom:12px;position:relative;overflow:hidden;backdrop-filter:blur(12px)}
+.card::after{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(45,255,160,.07),transparent 70%);pointer-events:none}
+.card-mint{border-color:rgba(45,255,160,.2);background:linear-gradient(135deg,rgba(45,255,160,.06),rgba(0,232,122,.02))}
+.card-rose{border-color:rgba(255,94,122,.2);background:linear-gradient(135deg,rgba(255,94,122,.06),rgba(255,94,122,.02))}
+.card-amber{border-color:rgba(255,179,71,.2)}
+.card-sky{border-color:rgba(77,184,255,.2)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,rgba(45,255,160,.1) 0%,rgba(20,23,32,.8) 60%);border:1px solid rgba(45,255,160,.18);border-radius:var(--r24);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(45,255,160,.12),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hero-lbl{font-size:12px;font-weight:600;color:var(--t2);letter-spacing:.5px}
+.hero-status{font-size:22px;font-weight:700;margin-top:2px}
+.hero-status.on{color:var(--mint)}.hero-status.off{color:var(--t2)}
+
+/* SECTION LABELS */
+.sl{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;justify-content:space-between}
+.sl:first-child{margin-top:0}
+.sl-a{font-size:12px;color:var(--mint);font-weight:600;letter-spacing:0;cursor:pointer;text-transform:none}
+
+/* TOGGLE */
+.tog{position:relative;width:52px;height:28px;cursor:pointer;flex-shrink:0}
+.tog input{display:none}
+.tog-t{width:52px;height:28px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid var(--bd);transition:.25s}
+.tog input:checked+.tog-t{background:rgba(45,255,160,.25);border-color:rgba(45,255,160,.5)}
+.tog-k{position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:var(--t2);transition:.25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.tog input:checked~.tog-k{transform:translateX(24px);background:var(--mint);box-shadow:0 2px 12px rgba(45,255,160,.5)}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;border:1px solid;font-size:11px;font-weight:600;font-family:var(--fm);white-space:nowrap}
+.tag-mint{color:var(--mint);border-color:rgba(45,255,160,.3);background:rgba(45,255,160,.08)}
+.tag-rose{color:var(--rose);border-color:rgba(255,94,122,.3);background:rgba(255,94,122,.08)}
+.tag-amber{color:var(--amber);border-color:rgba(255,179,71,.3);background:rgba(255,179,71,.08)}
+.tag-sky{color:var(--sky);border-color:rgba(77,184,255,.3);background:rgba(77,184,255,.08)}
+.tag-lav{color:var(--lav);border-color:rgba(180,122,255,.3);background:rgba(180,122,255,.08)}
+.tag-dim{color:var(--t3);border-color:rgba(255,255,255,.07);background:transparent}
+
+/* KPI */
+.kgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.kbox{background:var(--sf);border:1px solid var(--bd2);border-radius:var(--r16);padding:14px 12px;text-align:center;backdrop-filter:blur(8px)}
+.kbox-v{font-family:var(--fm);font-size:24px;font-weight:500;line-height:1;margin-bottom:4px}
+.kbox-v.mint{color:var(--mint)}.kbox-v.rose{color:var(--rose)}.kbox-v.amber{color:var(--amber)}.kbox-v.sky{color:var(--sky)}
+.kbox-l{font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+
+/* MARKET */
+.mkt-i{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd2)}
+.mkt-i:last-child{border-bottom:none;padding-bottom:0}
+.mkt-led{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mkt-nm{font-size:13px;font-weight:600;width:68px}
+.mkt-inf{flex:1}
+.mkt-cnt{font-family:var(--fm);font-size:12px;font-weight:500;margin-bottom:2px}
+.mkt-avg{font-size:11px;color:var(--t3)}
+.mkt-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* PILLS */
+.mpills{display:flex;gap:8px;flex-wrap:wrap}
+.mpill{padding:8px 18px;border-radius:20px;border:1px solid var(--bd);font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:.18s;user-select:none;background:var(--sf2)}
+.mpill.on-sky{border-color:rgba(77,184,255,.45);color:var(--sky);background:rgba(77,184,255,.09)}
+.mpill.on-lav{border-color:rgba(180,122,255,.45);color:var(--lav);background:rgba(180,122,255,.09)}
+.mpill.on-amb{border-color:rgba(255,179,71,.45);color:var(--amber);background:rgba(255,179,71,.09)}
+
+/* RANGE */
+.rb{margin-bottom:16px}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rn{font-size:12px;font-weight:600;color:var(--t2)}
+.rv{font-family:var(--fm);font-size:12px;color:var(--mint);font-weight:500}
+input[type=range]{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.1);-webkit-appearance:none;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--bg);border:2.5px solid var(--mint);box-shadow:0 0 12px rgba(45,255,160,.45);cursor:pointer;transition:.1s}
+
+/* INPUTS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px}
+.inp{width:100%;padding:12px 16px;border-radius:var(--r12);background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--t1);font-size:14px;font-family:var(--f);outline:none;transition:.18s}
+.inp:focus{border-color:rgba(45,255,160,.4);background:rgba(45,255,160,.04)}
+.inp::placeholder{color:var(--t3)}
+.inp-mono{font-family:var(--fm);font-size:13px}
+select.inp option{background:#1a1d2b}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:14px 20px;border-radius:var(--r16);font-size:14px;font-weight:700;font-family:var(--f);border:none;cursor:pointer;transition:.18s;text-align:center}
+.btn:active{transform:scale(.97)}
+.btn-mint{background:linear-gradient(135deg,#2dffa0,#00c870);color:#041a0c;box-shadow:0 6px 24px rgba(45,255,160,.28)}
+.btn-ghost{background:rgba(255,255,255,.06);color:var(--t1);border:1px solid var(--bd)}
+.btn-rose{background:rgba(255,94,122,.14);color:var(--rose);border:1px solid rgba(255,94,122,.25)}
+.btn-amber{background:linear-gradient(135deg,#ffb347,#e6900a);color:#1a0d00;box-shadow:0 4px 18px rgba(255,179,71,.22)}
+.btn-sm{padding:10px 16px;font-size:12px;border-radius:var(--r12);width:auto}
+.brow{display:flex;gap:8px}.brow .btn{flex:1}
+.qrow{display:flex;gap:6px;margin-top:10px}
+.qbtn{flex:1;padding:9px 4px;border-radius:10px;font-family:var(--fm);font-size:12px;font-weight:500;background:rgba(255,255,255,.06);border:1px solid var(--bd2);color:var(--t2);cursor:pointer;text-align:center;transition:.15s}
+.qbtn:active{background:rgba(45,255,160,.12);border-color:rgba(45,255,160,.4);color:var(--mint)}
+
+/* GIFT CARDS */
+.gcard{background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r16);padding:14px 16px;margin-bottom:8px;position:relative;overflow:hidden}
+.gcard-s{border-color:rgba(255,94,122,.2);background:rgba(255,94,122,.04)}
+.gcard-a{border-color:rgba(45,255,160,.2);background:rgba(45,255,160,.03)}
+.gcard-badge{position:absolute;top:0;right:0;padding:4px 12px;border-radius:0 var(--r16) 0 var(--r12);font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.8px}
+.gcard-badge-s{background:rgba(255,94,122,.18);color:var(--rose)}
+.gcard-badge-a{background:rgba(45,255,160,.14);color:var(--mint)}
+.gcard-name{font-size:15px;font-weight:700;padding-right:80px;margin-bottom:6px}
+.gcard-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gcard-price{font-family:var(--fm);font-size:16px;font-weight:500;color:var(--mint)}
+.gcard-floor{font-family:var(--fm);font-size:11px;color:var(--t3)}
+.gcard-mkt{padding:3px 9px;border-radius:6px;font-family:var(--fm);font-size:10px;font-weight:500;background:rgba(255,255,255,.07);color:var(--t2)}
+
+/* ARB */
+.acard{background:var(--sf2);border:1px solid rgba(45,255,160,.15);border-radius:var(--r20);padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
+.acard::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--mint),var(--mint2));border-radius:3px 0 0 3px}
+.acard-top{display:flex;justify-content:space-between;align-items:flex-start;padding-left:10px;margin-bottom:12px}
+.acard-name{font-size:14px;font-weight:700}
+.acard-meta{font-size:11px;color:var(--t3);margin-top:3px}
+.acard-pval{font-family:var(--fm);font-size:20px;font-weight:500;color:var(--mint);text-align:right}
+.acard-roi{font-family:var(--fm);font-size:11px;color:var(--mint);opacity:.65;text-align:right}
+.acard-rows{padding-left:10px}
+.acard-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px}
+.acard-rl{color:var(--t3)}
+.acard-rv{font-family:var(--fm);font-weight:500}
+.acard-cta{margin:12px 10px 0;padding:10px 16px;background:rgba(45,255,160,.1);border:1px solid rgba(45,255,160,.22);border-radius:var(--r12);color:var(--mint);font-weight:700;font-size:13px;text-align:center;cursor:pointer;text-decoration:none;display:block}
+
+/* SNIPER */
+.snp-big{text-align:center;padding:24px 0 14px;font-family:var(--fm);font-size:64px;font-weight:400;color:var(--rose);line-height:1;text-shadow:0 0 40px rgba(255,94,122,.3);letter-spacing:-2px}
+.snp-unit{font-size:28px;opacity:.5}
+
+/* PORTFOLIO */
+.port-banner{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r24);padding:22px;margin-bottom:12px;text-align:center;backdrop-filter:blur(12px)}
+.port-profit{font-family:var(--fm);font-size:42px;font-weight:400;line-height:1;letter-spacing:-1px}
+.port-profit.up{color:var(--mint)}.port-profit.dn{color:var(--rose)}
+.port-sub{font-size:12px;color:var(--t3);margin-top:8px;font-weight:500}
+.pitem{background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r16);padding:15px 16px;margin-bottom:8px}
+.pitem-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.pitem-name{font-size:14px;font-weight:700}
+.pitem-sub{font-size:11px;color:var(--t3);margin-top:3px}
+.pitem-pnl{font-family:var(--fm);font-size:16px;font-weight:500;text-align:right}
+.pitem-pnl.up{color:var(--mint)}.pitem-pnl.dn{color:var(--rose)}
+.pitem-pct{font-size:11px;opacity:.65;text-align:right}
+.pbar{height:3px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px}
+.pbar-f{height:100%;border-radius:2px;transition:width .45s cubic-bezier(.23,1,.32,1)}
+.pbar-f.up{background:linear-gradient(90deg,var(--mint),var(--mint2))}.pbar-f.dn{background:linear-gradient(90deg,var(--rose),#ff8fa3)}
+.del-btn{background:none;border:none;color:var(--t3);font-size:16px;cursor:pointer;line-height:1;padding:2px 4px}
+
+/* WATCHLIST */
+.witem{display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r16);padding:13px 16px;margin-bottom:8px}
+.witem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.witem-body{flex:1;min-width:0}
+.witem-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.witem-meta{font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--fm)}
+
+/* NUMBERS */
+.num-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.nchip{position:relative;padding:7px 16px;border-radius:20px;font-family:var(--fm);font-size:13px;font-weight:500;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.22);color:var(--amber)}
+.nchip-x{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--rose);border:2px solid var(--bg);font-size:9px;display:none;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+.nchip:hover .nchip-x{display:flex}
+.preset-row{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{padding:6px 14px;border-radius:14px;font-family:var(--fm);font-size:12px;font-weight:500;background:rgba(255,255,255,.05);border:1px solid var(--bd2);color:var(--t2);cursor:pointer;transition:.15s}
+.pchip:active{background:rgba(255,179,71,.12);border-color:rgba(255,179,71,.35);color:var(--amber)}
+.pchip.used{opacity:.3;cursor:default}
+
+/* SALES */
+.sitem{display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r16);padding:12px 14px;margin-bottom:8px;animation:si-in .25s ease both}
+@keyframes si-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.sitem:first-child{border-color:rgba(45,255,160,.18)}
+.sitem-ico{width:38px;height:38px;border-radius:var(--r12);flex-shrink:0;background:rgba(45,255,160,.08);border:1px solid rgba(45,255,160,.12);display:flex;align-items:center;justify-content:center;font-size:17px}
+.sitem-body{flex:1;min-width:0}
+.sitem-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sitem-meta{font-size:11px;color:var(--t3);margin-top:2px;font-family:var(--fm)}
+.sitem-right{text-align:right;flex-shrink:0}
+.sitem-price{font-family:var(--fm);font-size:14px;font-weight:500;color:var(--amber)}
+.sitem-time{font-size:10px;color:var(--t3);margin-top:2px;font-family:var(--fm)}
+
+/* WALLET */
+.waddr{font-family:var(--fm);font-size:12px;color:var(--t2);background:rgba(255,255,255,.05);padding:12px 14px;border-radius:var(--r12);word-break:break-all;border:1px solid var(--bd2);margin-bottom:14px;line-height:1.7}
+.wbal{font-family:var(--fm);font-size:48px;font-weight:400;color:var(--sky);text-align:center;padding:14px 0 4px;letter-spacing:-1px;text-shadow:0 0 30px rgba(77,184,255,.25)}
+.wbal-lbl{font-size:11px;color:var(--t3);text-align:center;font-family:var(--fm);letter-spacing:1px;text-transform:uppercase}
+
+/* HEATMAP */
+.hmap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hcell{border-radius:var(--r16);padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid transparent}
+.hcell-v{font-family:var(--fm);font-size:18px;font-weight:500}
+.hcell-n{font-size:10px;font-weight:600;text-align:center;opacity:.65}
+
+/* BNAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(15,17,23,.9);backdrop-filter:blur(24px);border-top:1px solid var(--bd2);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:var(--sab)}
+.bni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 11px;cursor:pointer;color:var(--t3);font-size:10px;font-weight:600;border:none;background:none;font-family:var(--f);transition:.15s;position:relative}
+.bni.on{color:var(--mint)}
+.bni.on::after{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,transparent,var(--mint),transparent);border-radius:0 0 3px 3px}
+.bni-ico{font-size:20px;line-height:1}
+.bni.on .bni-ico{filter:drop-shadow(0 0 6px rgba(45,255,160,.5))}
+.bni-dot{position:absolute;top:8px;right:calc(50% - 15px);width:6px;height:6px;border-radius:50%;background:var(--rose);border:1.5px solid var(--bg);display:none}
+.bni-dot.on{display:block}
+
+/* SUB-TABS */
+.stabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none}
+.stabs::-webkit-scrollbar{display:none}
+.stab{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd2);color:var(--t2);background:var(--sf2);transition:.15s;white-space:nowrap}
+.stab.on{background:rgba(45,255,160,.12);border-color:rgba(45,255,160,.3);color:var(--mint)}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);align-items:flex-end}
+.modal.on{display:flex}
+.msheet{width:100%;max-height:90vh;overflow-y:auto;background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 18px calc(18px + var(--sab));border-top:1px solid var(--bd);animation:su .24s cubic-bezier(.32,1,.56,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:none}}
+.msheet-h{width:36px;height:4px;background:var(--bd);border-radius:2px;margin:0 auto 20px}
+.msheet-t{font-size:18px;font-weight:700;margin-bottom:18px}
+
+/* TOAST */
+#toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(10px);background:rgba(20,23,32,.95);backdrop-filter:blur(12px);border:1px solid var(--bd);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:600;opacity:0;transition:.22s;z-index:500;white-space:nowrap;pointer-events:none;font-family:var(--fm)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.mint{border-color:rgba(45,255,160,.4);color:var(--mint)}
+#toast.rose{border-color:rgba(255,94,122,.4);color:var(--rose)}
+
+/* EMPTY / ERROR */
+.empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-ico{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-txt{font-size:13px;line-height:1.6;color:var(--t3)}
+.err-banner{background:rgba(255,94,122,.07);border:1px solid rgba(255,94,122,.2);border-radius:var(--r12);padding:12px 16px;font-size:12px;color:var(--rose);margin-bottom:12px;text-align:center}
+
+/* UTIL */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--bd2) 30%,var(--bd2) 70%,transparent);margin:16px 0}
+.row{display:flex;justify-content:space-between;align-items:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mt10{margin-top:10px}.mt14{margin-top:14px}.mb0{margin-bottom:0!important}.mb10{margin-bottom:10px}
+.mono{font-family:var(--fm)}.t3{color:var(--t3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+</style>
 </head>
 <body>
-    <div id="app"></div>
-    
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+<div id="app">
 
-        const MOCK_DATA = {
-            user: { balance: 150.00, wallet: 'EQD...xxxx' },
-            markets: [
-                { name: 'Tonnel', floor: 8.50, change: 5.2, volume: 1250, color: '#2196F3' },
-                { name: 'Portals', floor: 9.20, change: -2.1, volume: 890, color: '#9C27B0' },
-                { name: 'MRKT', floor: 7.80, change: 12.5, volume: 2100, color: '#FF9800' }
-            ],
-            sniper: [
-                { name: 'Toy Bear', number: '#123', price: 6.50, floor: 8.50, discount: 23.5, url: '#' },
-                { name: 'Skull Flower', number: '#9220', price: 15.00, floor: 18.50, discount: 18.9, url: '#' }
-            ],
-            sales: [
-                { name: 'Dolphin', price: 15.5, time: '12:30' },
-                { name: 'Cat', price: 22.0, time: '12:28' },
-                { name: 'Bear', price: 8.9, time: '12:25' }
-            ],
-            portfolio: [
-                { name: 'Toy Bear', profit: 1.8, roi: 17.1 },
-                { name: 'Panda', profit: -0.5, roi: -6.3 },
-                { name: 'Skull Flower', profit: 3.5, roi: 23.3 }
-            ],
-            commands: [
-                '/start - Запустить', '/help - Справка', '/webapp - Dashboard',
-                '/wallet - Кошелёк', '/portfolio - Портфель', '/stats - Статистика',
-                '/top - ТОП арбитражей', '/sales - Продажи', '/sniper - SNIPER',
-                '/target_num - Номера', '/provenance - История', '/getauth - Auth'
-            ]
-        };
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-gem">🎁</div>
+    <div class="hdr-name">Gift<span>Monitor</span></div>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-upd" id="hdr-upd">—</span>
+    <div class="orb loading" id="orb"></div>
+  </div>
+</header>
 
-        let activeTab = 'home';
+<!-- PAGE: HOME -->
+<div class="page on" id="pg-home">
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-lbl">МОНИТОРИНГ</div>
+        <div class="hero-status off" id="hero-st">Выключен</div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" id="sw-mon" onchange="toggleMon(this)">
+        <div class="tog-t"></div><div class="tog-k"></div>
+      </label>
+    </div>
+    <div class="tags" id="hero-tags">
+      <span class="tag tag-rose">🚨 Sniper</span>
+      <span class="tag tag-mint">💎 Арбитраж</span>
+      <span class="tag tag-sky">Tonnel</span>
+      <span class="tag tag-lav">Portals</span>
+      <span class="tag tag-amber">MRKT</span>
+      <span class="tag tag-dim" id="tag-price">0–500 TON</span>
+    </div>
+  </div>
 
-        function render() {
-            const app = document.getElementById('app');
-            
-            if (activeTab === 'home') {
-                app.innerHTML = `
-                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
-                        <h1 class="text-2xl font-bold mb-2">💰 Баланс</h1>
-                        <p class="text-4xl font-bold">${MOCK_DATA.user.balance.toFixed(2)} TON</p>
-                        <p class="text-sm opacity-80 mt-2">👛 ${MOCK_DATA.user.wallet}</p>
-                    </div>
-                    
-                    <div class="px-4">
-                        <h2 class="font-bold text-lg mb-3">🏪 Маркеты</h2>
-                        ${MOCK_DATA.markets.map(m => `
-                            <div class="card">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="font-bold">${m.name}</p>
-                                        <p class="text-sm opacity-60">Floor Price</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-xl font-bold">${m.floor.toFixed(2)} TON</p>
-                                        <p class="text-sm ${m.change >= 0 ? 'text-green-500' : 'text-red-500'}">
-                                            ${m.change >= 0 ? '↑' : '↓'} ${Math.abs(m.change)}%
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (activeTab === 'sniper') {
-                app.innerHTML = `
-                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
-                        <h1 class="text-2xl font-bold">🚨 SNIPER</h1>
-                        <p class="text-sm opacity-80">Подарки ниже floor</p>
-                    </div>
-                    <div class="px-4">
-                        ${MOCK_DATA.sniper.map(s => `
-                            <div class="card border-l-4 border-red-500">
-                                <div class="flex justify-between">
-                                    <div>
-                                        <p class="font-bold">${s.name} ${s.number}</p>
-                                        <p class="text-sm opacity-60">${s.price.toFixed(2)} TON</p>
-                                    </div>
-                                    <div class="text-right text-red-500">
-                                        <p class="font-bold">-${s.discount}%</p>
-                                        <p class="text-xs">ниже floor</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (activeTab === 'sales') {
-                app.innerHTML = `
-                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
-                        <h1 class="text-2xl font-bold">💰 Продажи</h1>
-                        <p class="text-sm opacity-80">Последние транзакции</p>
-                    </div>
-                    <div class="px-4">
-                        ${MOCK_DATA.sales.map(s => `
-                            <div class="card flex justify-between items-center">
-                                <div>
-                                    <p class="font-bold">${s.name}</p>
-                                    <p class="text-sm opacity-60">${s.time}</p>
-                                </div>
-                                <p class="font-bold text-lg">${s.price.toFixed(2)} TON</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (activeTab === 'portfolio') {
-                const totalProfit = MOCK_DATA.portfolio.reduce((sum, p) => sum + p.profit, 0);
-                app.innerHTML = `
-                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
-                        <h1 class="text-2xl font-bold">📂 Портфель</h1>
-                        <p class="text-sm opacity-80">Прибыль: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} TON</p>
-                    </div>
-                    <div class="px-4">
-                        ${MOCK_DATA.portfolio.map(p => `
-                            <div class="card">
-                                <div class="flex justify-between">
-                                    <div>
-                                        <p class="font-bold">${p.name}</p>
-                                        <p class="text-sm opacity-60">ROI: ${p.roi}%</p>
-                                    </div>
-                                    <p class="font-bold ${p.profit >= 0 ? 'text-green-500' : 'text-red-500'}">
-                                        ${p.profit >= 0 ? '+' : ''}${p.profit.toFixed(2)} TON
-                                    </p>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (activeTab === 'help') {
-                app.innerHTML = `
-                    <div class="gradient text-white p-6 rounded-b-3xl mb-4">
-                        <h1 class="text-2xl font-bold">📋 Помощь</h1>
-                        <p class="text-sm opacity-80">Все команды бота</p>
-                    </div>
-                    <div class="px-4">
-                        <div class="card">
-                            ${MOCK_DATA.commands.map(c => `
-                                <div class="py-2 border-b border-white/10 last:border-0">
-                                    <code class="text-blue-500 font-bold">${c.split(' - ')[0]}</code>
-                                    <span class="opacity-80 ml-2">${c.split(' - ')[1]}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
+  <div class="kgrid">
+    <div class="kbox"><div class="kbox-v" id="kv-lst">—</div><div class="kbox-l">Листингов</div></div>
+    <div class="kbox"><div class="kbox-v mint" id="kv-arb">—</div><div class="kbox-l">Арбитражей</div></div>
+    <div class="kbox"><div class="kbox-v rose" id="kv-snp">—</div><div class="kbox-l">Sniper</div></div>
+    <div class="kbox"><div class="kbox-v amber" id="kv-ntf">—</div><div class="kbox-l">Уведомлений</div></div>
+  </div>
 
-            // Render tabs
-            const tabs = document.getElementById('tabs');
-            tabs.innerHTML = `
-                <button onclick="setTab('home')" class="tab flex-1 ${activeTab === 'home' ? 'tab-active' : ''}">📊</button>
-                <button onclick="setTab('sniper')" class="tab flex-1 ${activeTab === 'sniper' ? 'tab-active' : ''}">🚨</button>
-                <button onclick="setTab('sales')" class="tab flex-1 ${activeTab === 'sales' ? 'tab-active' : ''}">💰</button>
-                <button onclick="setTab('portfolio')" class="tab flex-1 ${activeTab === 'portfolio' ? 'tab-active' : ''}">📂</button>
-                <button onclick="setTab('help')" class="tab flex-1 ${activeTab === 'help' ? 'tab-active' : ''}">📋</button>
-            `;
+  <div class="card card-mint">
+    <div class="sl" style="margin-top:0"><span>Состояние рынков</span><span class="sl-a" onclick="loadData()">↺ Обновить</span></div>
+    <div id="mkt-list"><div class="t3" style="font-size:13px;text-align:center;padding:8px">Загрузка...</div></div>
+  </div>
+
+  <div class="sl"><span>Быстрые действия</span></div>
+  <div class="brow mb10">
+    <button class="btn btn-mint" onclick="gp('arb')">💎 Арбитражи</button>
+    <button class="btn btn-ghost" onclick="gp('sniper')">🚨 Sniper</button>
+  </div>
+  <div class="brow mb10">
+    <button class="btn btn-ghost" onclick="gp('more');showSub('sales')">💰 Продажи</button>
+    <button class="btn btn-amber" onclick="resetN()">↺ Сбросить</button>
+  </div>
+
+  <div class="sl"><span>Тепловая карта активности</span></div>
+  <div class="hmap" id="hmap"></div>
+</div>
+
+<!-- PAGE: MONITOR -->
+<div class="page" id="pg-monitor">
+  <div class="card">
+    <div class="sl" style="margin-top:0"><span>Маркеты</span></div>
+    <div class="mpills">
+      <div class="mpill on-sky" id="pl-t" onclick="tMkt('tonnel',this,'on-sky')">🔵 Tonnel</div>
+      <div class="mpill on-lav" id="pl-p" onclick="tMkt('portals',this,'on-lav')">🟣 Portals</div>
+      <div class="mpill on-amb" id="pl-m" onclick="tMkt('mrkt',this,'on-amb')">🟠 MRKT</div>
+    </div>
+    <div class="divider"></div>
+    <div class="sl" style="margin-top:0"><span>Диапазон цен</span></div>
+    <div class="rb"><div class="rh"><span class="rn">Минимум</span><span class="rv" id="rv-min">0 TON</span></div><input type="range" id="r-min" min="0" max="500" value="0" oninput="onR()"></div>
+    <div class="rb"><div class="rh"><span class="rn">Максимум</span><span class="rv" id="rv-max">500 TON</span></div><input type="range" id="r-max" min="1" max="1000" value="500" oninput="onR()"></div>
+    <div class="divider"></div>
+    <div class="sl" style="margin-top:0"><span>Редкость</span><span class="rv" id="rv-rar">≤ 100%</span></div>
+    <input type="range" id="r-rar" min="0.1" max="100" step="0.1" value="100" oninput="onRar()">
+    <div style="font-size:11px;color:var(--t3);margin-top:6px">Меньше = только редкие подарки</div>
+    <div class="divider"></div>
+    <div class="sl" style="margin-top:0"><span>Фильтр по имени</span></div>
+    <input type="text" class="inp" id="inp-gf" placeholder="Например: Toy Bear" oninput="S.filter=this.value">
+  </div>
+  <button class="btn btn-mint" onclick="saveMon()">💾 Сохранить настройки</button>
+  <div class="sl"><span>Активные листинги</span><span class="sl-a" onclick="loadData()">↺</span></div>
+  <div id="gift-list"></div>
+</div>
+
+<!-- PAGE: ARBITRAGE -->
+<div class="page" id="pg-arb">
+  <div class="card">
+    <div class="sl" style="margin-top:0"><span>Торговый баланс</span><span class="mono" style="color:var(--mint);font-size:13px" id="bal-lbl">0 TON</span></div>
+    <input type="number" class="inp" id="inp-bal" placeholder="Введи баланс в TON" step="0.1" min="0"
+      oninput="S.balance=+this.value;document.getElementById('bal-lbl').textContent=S.balance+' TON'">
+    <div class="qrow">
+      <div class="qbtn" onclick="qb(10)">10</div>
+      <div class="qbtn" onclick="qb(25)">25</div>
+      <div class="qbtn" onclick="qb(50)">50</div>
+      <div class="qbtn" onclick="qb(100)">100</div>
+      <div class="qbtn" onclick="qb(250)">250</div>
+    </div>
+  </div>
+  <div class="sl"><span>Топ арбитражей</span><span class="sl-a" onclick="loadData()">↺ Обновить</span></div>
+  <div id="arb-list"></div>
+</div>
+
+<!-- PAGE: SNIPER -->
+<div class="page" id="pg-sniper">
+  <div class="card card-rose">
+    <div class="row">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--t2);letter-spacing:.5px;margin-bottom:4px">SNIPER MODE</div>
+        <div style="font-size:14px;font-weight:600">Подарки ниже floor price</div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" id="sw-snp" onchange="S.sniper=this.checked;save();toast(this.checked?'🚨 Sniper включён':'Sniper выключен',this.checked?'mint':'')">
+        <div class="tog-t"></div><div class="tog-k"></div>
+      </label>
+    </div>
+    <div class="divider"></div>
+    <div class="row mb10"><span style="font-size:12px;font-weight:600;color:var(--t2)">Порог срабатывания</span></div>
+    <div class="snp-big" id="snp-d">20<span class="snp-unit">%</span></div>
+    <input type="range" id="r-snp" min="5" max="50" value="20" oninput="onSnp(this.value)" style="width:100%">
+    <div class="row mt10" style="font-size:10px;color:var(--t3)"><span>5% — агрессивно</span><span>50% — осторожно</span></div>
+  </div>
+  <div class="card" style="border-color:rgba(255,94,122,.12)">
+    <div style="font-size:12px;color:var(--t2);line-height:2">
+      → Алерт когда цена на <strong id="snp-hint" style="color:var(--rose)">20%</strong> ниже floor<br>
+      → Рекомендуемый диапазон: <strong style="color:var(--rose)">15–25%</strong><br>
+      → Sniper алерты <strong style="color:var(--rose)">приходят первыми</strong>
+    </div>
+  </div>
+  <div class="sl"><span>Sniper алерты</span></div>
+  <div id="snp-list"></div>
+</div>
+
+<!-- PAGE: MORE -->
+<div class="page" id="pg-more">
+  <div class="stabs">
+    <div class="stab on" id="st-port" onclick="showSub('port')">📂 Портфель</div>
+    <div class="stab" id="st-watch" onclick="showSub('watch')">👁 Watchlist</div>
+    <div class="stab" id="st-nums" onclick="showSub('nums')">🔢 Номера</div>
+    <div class="stab" id="st-sales" onclick="showSub('sales')">💰 Продажи</div>
+    <div class="stab" id="st-wallet" onclick="showSub('wallet')">💳 Кошелёк</div>
+  </div>
+
+  <div id="sb-port">
+    <div id="pb-wrap"></div>
+    <button class="btn btn-mint mb10" onclick="openM('m-port')">＋ Добавить подарок</button>
+    <div id="port-list"></div>
+  </div>
+
+  <div id="sb-watch" style="display:none">
+    <div class="card">
+      <div class="sl" style="margin-top:0"><span>Добавить в Watchlist</span></div>
+      <div class="field"><label>Название подарка</label><input type="text" class="inp" id="w-n" placeholder="Toy Bear"></div>
+      <div class="field"><label>Целевая цена (TON)</label><input type="number" class="inp" id="w-p" placeholder="15.0" step="0.1"></div>
+      <button class="btn btn-mint" onclick="addW()">Добавить</button>
+    </div>
+    <div class="sl"><span>Список наблюдения</span></div>
+    <div id="w-list"></div>
+  </div>
+
+  <div id="sb-nums" style="display:none">
+    <div class="card">
+      <div class="sl" style="margin-top:0"><span>Мои номера</span></div>
+      <div class="num-wrap" id="nchips"></div>
+      <div class="field">
+        <label>Добавить номер</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" class="inp" id="inp-n" placeholder="777" min="1" style="flex:1">
+          <button class="btn btn-mint btn-sm" onclick="addN()" style="flex-shrink:0;padding:12px 22px">＋</button>
+        </div>
+      </div>
+      <div class="sl" style="margin-top:4px"><span>Популярные</span></div>
+      <div class="preset-row" id="prow"></div>
+    </div>
+  </div>
+
+  <div id="sb-sales" style="display:none">
+    <!-- Sales subscription toggle -->
+    <div class="card card-mint">
+      <div class="row">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px">УВЕДОМЛЕНИЯ О ПРОДАЖАХ</div>
+          <div style="font-size:14px;font-weight:600">Реальные сделки с маркетов</div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" id="sw-sales" onchange="S.sales=this.checked;save();toast(this.checked?'💰 Включено':'Выключено',this.checked?'mint':'')">
+          <div class="tog-t"></div><div class="tog-k"></div>
+        </label>
+      </div>
+    </div>
+    <div class="sl"><span>Последние продажи</span><span class="sl-a" onclick="loadData()">↺ Обновить</span></div>
+    <!-- data-source banner -->
+    <div id="sales-src-banner" style="display:none" class="err-banner"></div>
+    <div id="sales-list"></div>
+  </div>
+
+  <div id="sb-wallet" style="display:none">
+    <div id="w-empty">
+      <div class="card">
+        <div class="sl" style="margin-top:0"><span>Подключить кошелёк</span></div>
+        <div class="field"><label>Адрес TON кошелька</label><input type="text" class="inp inp-mono" id="inp-w" placeholder="EQD..."></div>
+        <button class="btn btn-mint" onclick="connW()">Подключить</button>
+      </div>
+    </div>
+    <div id="w-conn" style="display:none">
+      <div class="card card-sky">
+        <div class="sl" style="margin-top:0"><span>Подключён</span></div>
+        <div class="waddr" id="w-addr-el"></div>
+        <div class="wbal" id="w-bal-el">—</div>
+        <div class="wbal-lbl">TON Balance</div>
+      </div>
+      <div class="card mt14">
+        <div class="sl" style="margin-top:0"><span>NFT подарки</span></div>
+        <div id="w-nfts"></div>
+      </div>
+      <div class="brow mt14">
+        <button class="btn btn-ghost" onclick="refW()">↺ Обновить</button>
+        <button class="btn btn-rose" onclick="discW()">Отключить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bni on" id="bn-home" onclick="gp('home')"><span class="bni-ico">📊</span>Главная</button>
+  <button class="bni" id="bn-monitor" onclick="gp('monitor')"><span class="bni-ico">🔍</span>Монитор</button>
+  <button class="bni" id="bn-arb" onclick="gp('arb')"><span class="bni-ico">💎</span>Арбитраж<div class="bni-dot" id="d-arb"></div></button>
+  <button class="bni" id="bn-sniper" onclick="gp('sniper')"><span class="bni-ico">🚨</span>Sniper<div class="bni-dot" id="d-snp"></div></button>
+  <button class="bni" id="bn-more" onclick="gp('more')"><span class="bni-ico">⋯</span>Ещё</button>
+</nav>
+</div>
+
+<div id="toast"></div>
+
+<!-- MODAL: Add Portfolio -->
+<div class="modal" id="m-port" onclick="closeM('m-port')">
+  <div class="msheet" onclick="event.stopPropagation()">
+    <div class="msheet-h"></div>
+    <div class="msheet-t">📥 Добавить в портфель</div>
+    <div class="field"><label>Название подарка</label><input type="text" class="inp" id="p-nm" placeholder="Toy Bear"></div>
+    <div class="g2">
+      <div class="field mb0"><label>Номер #</label><input type="number" class="inp" id="p-num" placeholder="1234"></div>
+      <div class="field mb0"><label>Маркет</label><select class="inp" id="p-mkt"><option>Tonnel</option><option>Portals</option><option>MRKT</option></select></div>
+    </div>
+    <div class="g2 mt10">
+      <div class="field mb0"><label>Цена (TON)</label><input type="number" class="inp" id="p-pr" placeholder="15.5" step="0.1"></div>
+      <div class="field mb0"><label>Редкость %</label><input type="number" class="inp" id="p-rar" placeholder="5.0" step="0.1"></div>
+    </div>
+    <div class="brow mt14">
+      <button class="btn btn-ghost" onclick="closeM('m-port')">Отмена</button>
+      <button class="btn btn-mint" onclick="addPort()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// STATE  (persisted locally)
+// ════════════════════════════════════════════
+const S = {
+  monitoring: false, sniper: true, arb_mode: true, sales: false,
+  markets: ['tonnel','portals','mrkt'],
+  min_price: 0, max_price: 500, max_rarity: 100, filter: '',
+  sniper_threshold: 20, balance: 0,
+  portfolio: [], watchlist: {}, numbers: [], wallet: '',
+};
+
+// ════════════════════════════════════════════
+// REMOTE DATA  (loaded from bot's data.json)
+// ════════════════════════════════════════════
+let R = {
+  timestamp: 0,
+  recent_sales: [],      // ← реальные продажи от бота
+  market_stats: {},      // ← реальная статистика маркетов
+  arbitrage: [],         // ← реальные арбитражи от бота
+  active_monitors: 0,
+  user: null,            // ← данные текущего юзера (если совпадает ID)
+};
+
+// URL до data.json на GitHub Pages (относительный путь — работает т.к. TMA хостится там же)
+const DATA_URL = './data.json';
+const REFRESH_INTERVAL = 30_000; // 30 сек
+
+// ════════════════════════════════════════════
+// PERSIST
+// ════════════════════════════════════════════
+function save() { try { localStorage.setItem('gm_v5', JSON.stringify(S)) } catch(e){} }
+function load() { try { const d = localStorage.getItem('gm_v5'); if (d) Object.assign(S, JSON.parse(d)) } catch(e){} }
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+addEventListener('DOMContentLoaded', () => {
+  load();
+  syncUI();
+  loadData();
+  setInterval(loadData, REFRESH_INTERVAL);
+  try { if (Telegram?.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } } catch(e) {}
+});
+
+// ════════════════════════════════════════════
+// LOAD REAL DATA FROM BOT EXPORT
+// ════════════════════════════════════════════
+async function loadData() {
+  setOrbState('loading');
+  try {
+    const resp = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+
+    R.timestamp      = data.timestamp || 0;
+    R.recent_sales   = data.recent_sales || [];
+    R.market_stats   = data.market_stats || {};
+    R.arbitrage      = data.arbitrage || [];
+    R.active_monitors = data.active_monitors || 0;
+
+    // Попытка найти данные текущего пользователя по Telegram user_id
+    try {
+      const tgId = Telegram?.WebApp?.initDataUnsafe?.user?.id;
+      if (tgId && data.users?.[String(tgId)]) {
+        const u = data.users[String(tgId)];
+        R.user = u;
+        // Синхронизируем настройки из бота (бот — источник правды)
+        if (u.settings) {
+          S.monitoring     = u.settings.monitoring ?? S.monitoring;
+          S.sniper         = u.settings.sniper ?? S.sniper;
+          S.sniper_threshold = u.settings.sniper_threshold ?? S.sniper_threshold;
+          S.arb_mode       = u.settings.arbitrage ?? S.arb_mode;
+          S.sales          = u.settings.sales ?? S.sales;
+          S.min_price      = u.settings.min_price ?? S.min_price;
+          S.max_price      = u.settings.max_price ?? S.max_price;
+          S.max_rarity     = u.settings.max_rarity ?? S.max_rarity;
+          S.filter         = u.settings.filter_gift_name ?? S.filter;
+          S.markets        = u.settings.markets ?? S.markets;
+          S.balance        = u.balance ?? S.balance;
+          S.portfolio      = u.portfolio ?? S.portfolio;
+          S.watchlist      = u.watchlist ?? S.watchlist;
+          S.numbers        = u.target_numbers ?? S.numbers;
         }
+      }
+    } catch(e) { /* нет Telegram контекста — игнорируем */ }
 
-        function setTab(tab) {
-            activeTab = tab;
-            render();
-        }
+    setOrbState('ok');
+    const ago = R.timestamp ? Math.round((Date.now()/1000 - R.timestamp)) : null;
+    document.getElementById('hdr-upd').textContent = ago !== null ? ago + 's ago' : '—';
 
-        // Initial render
-        render();
+    // Обновляем всё
+    syncUI();
+    rKPI();
+    rMkt();
+    rHmap();
+    rGifts();
+    rArb();
+    rSnp();
+    if (curSub === 'sales') rSales();
 
-        // Create tabs at bottom
-        const tabsDiv = document.createElement('div');
-        tabsDiv.id = 'tabs';
-        tabsDiv.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--tg-bg); border-top: 1px solid rgba(0,0,0,0.1); padding: 8px;';
-        document.body.appendChild(tabsDiv);
-    </script>
+  } catch(err) {
+    setOrbState('err');
+    document.getElementById('hdr-upd').textContent = 'ошибка';
+    // Если data.json недоступен — показываем заглушку, но не крешим
+    console.warn('data.json недоступен:', err.message);
+    rKPI();
+    rMkt();
+    rHmap();
+    rGifts();
+    rArb();
+    rSnp();
+    if (curSub === 'sales') rSales();
+  }
+}
+
+function setOrbState(s) {
+  const o = document.getElementById('orb');
+  o.className = 'orb' + (s === 'loading' ? ' loading' : s === 'err' ? ' off' : '');
+}
+
+// ════════════════════════════════════════════
+// SYNC UI FROM STATE
+// ════════════════════════════════════════════
+function syncUI() {
+  document.getElementById('sw-mon').checked  = S.monitoring;
+  document.getElementById('sw-snp').checked  = S.sniper;
+  document.getElementById('sw-sales').checked = S.sales;
+  document.getElementById('r-min').value = S.min_price;
+  document.getElementById('r-max').value = S.max_price;
+  document.getElementById('r-rar').value = S.max_rarity;
+  document.getElementById('r-snp').value = S.sniper_threshold;
+  document.getElementById('inp-bal').value = S.balance || '';
+  document.getElementById('inp-gf').value  = S.filter;
+  document.getElementById('rv-min').textContent = S.min_price + ' TON';
+  document.getElementById('rv-max').textContent = S.max_price + ' TON';
+  document.getElementById('rv-rar').textContent = '≤ ' + S.max_rarity + '%';
+  document.getElementById('snp-d').innerHTML = S.sniper_threshold + '<span class="snp-unit">%</span>';
+  document.getElementById('snp-hint').textContent = S.sniper_threshold + '%';
+  document.getElementById('bal-lbl').textContent = (S.balance || 0) + ' TON';
+  updHero();
+  updPills();
+  if (S.wallet) showWConn();
+  rPort(); rWatch(); rNums();
+}
+
+// ════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════
+const PAGES = ['home','monitor','arb','sniper','more'];
+function gp(n) {
+  PAGES.forEach(p => {
+    document.getElementById('pg-'+p)?.classList.remove('on');
+    document.getElementById('bn-'+p)?.classList.remove('on');
+  });
+  document.getElementById('pg-'+n)?.classList.add('on');
+  document.getElementById('bn-'+n)?.classList.add('on');
+  if (n === 'more') rActiveSub();
+}
+
+const SUBS = ['port','watch','nums','sales','wallet'];
+let curSub = 'port';
+function showSub(s) {
+  curSub = s;
+  SUBS.forEach(id => {
+    document.getElementById('sb-'+id).style.display = id === s ? 'block' : 'none';
+    document.getElementById('st-'+id).classList.toggle('on', id === s);
+  });
+  rActiveSub();
+}
+function rActiveSub() {
+  ({ port: rPort, watch: rWatch, nums: rNums, sales: rSales, wallet: ()=>{} })[curSub]?.();
+}
+
+// ════════════════════════════════════════════
+// MONITOR CONTROLS
+// ════════════════════════════════════════════
+function toggleMon(el) {
+  S.monitoring = el.checked; save(); updHero();
+  setOrbState(S.monitoring ? 'ok' : 'err');
+  toast(S.monitoring ? '🟢 Мониторинг включён' : '🔴 Выключен', S.monitoring ? 'mint' : 'rose');
+}
+function updHero() {
+  const on = S.monitoring;
+  const hs = document.getElementById('hero-st');
+  hs.textContent = on ? 'Работает' : 'Выключен';
+  hs.className = 'hero-status ' + (on ? 'on' : 'off');
+  const tgs = document.getElementById('hero-tags').children;
+  tgs[0].className = 'tag ' + (S.sniper    ? 'tag-rose' : 'tag-dim');
+  tgs[1].className = 'tag ' + (S.arb_mode  ? 'tag-mint' : 'tag-dim');
+  document.getElementById('tag-price').textContent = S.min_price + '–' + S.max_price + ' TON';
+}
+function tMkt(m, el, c) {
+  if (S.markets.includes(m)) {
+    if (S.markets.length === 1) { toast('⚠ Нужен минимум 1 маркет', 'rose'); return; }
+    S.markets = S.markets.filter(x => x !== m); el.classList.remove(c);
+  } else { S.markets.push(m); el.classList.add(c); }
+  save(); updHero();
+}
+function updPills() {
+  [['t','on-sky','tonnel'],['p','on-lav','portals'],['m','on-amb','mrkt']].forEach(([id,c,mkt]) => {
+    document.getElementById('pl-'+id).classList.toggle(c, S.markets.includes(mkt));
+  });
+}
+function onR() {
+  S.min_price = +document.getElementById('r-min').value;
+  S.max_price = +document.getElementById('r-max').value;
+  if (S.min_price > S.max_price) { document.getElementById('r-min').value = S.max_price; S.min_price = S.max_price; }
+  document.getElementById('rv-min').textContent = S.min_price + ' TON';
+  document.getElementById('rv-max').textContent = S.max_price + ' TON';
+  document.getElementById('tag-price').textContent = S.min_price + '–' + S.max_price + ' TON';
+}
+function onRar() {
+  S.max_rarity = +document.getElementById('r-rar').value;
+  document.getElementById('rv-rar').textContent = '≤ ' + S.max_rarity.toFixed(1) + '%';
+}
+function saveMon() { save(); toast('💾 Настройки сохранены', 'mint'); updHero(); }
+
+// ════════════════════════════════════════════
+// SNIPER
+// ════════════════════════════════════════════
+function onSnp(v) {
+  S.sniper_threshold = +v; save();
+  document.getElementById('snp-d').innerHTML = v + '<span class="snp-unit">%</span>';
+  document.getElementById('snp-hint').textContent = v + '%';
+}
+
+// ════════════════════════════════════════════
+// ARBITRAGE  ← данные из R.arbitrage (реальные, от бота)
+// ════════════════════════════════════════════
+function qb(n) {
+  S.balance = n;
+  document.getElementById('inp-bal').value = n;
+  document.getElementById('bal-lbl').textContent = n + ' TON';
+  save(); rArb(); toast('💰 Баланс: ' + n + ' TON', 'mint');
+}
+function rArb() {
+  const el = document.getElementById('arb-list');
+  // Фильтруем по балансу
+  const ops = R.arbitrage.filter(o => S.balance <= 0 || o.buy_price + o.fees <= S.balance);
+  document.getElementById('d-arb').classList.toggle('on', ops.length > 0);
+
+  if (!R.arbitrage.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">💎</div><div class="empty-txt">Данные загружаются...<br>Бот собирает арбитражи</div></div>';
+    return;
+  }
+  if (!ops.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">💎</div><div class="empty-txt">${S.balance <= 0 ? 'Установи торговый баланс<br>для фильтрации арбитражей' : 'Нет арбитражей под баланс ' + S.balance + ' TON'}</div></div>`;
+    return;
+  }
+  document.getElementById('kv-arb').textContent = ops.length;
+  el.innerHTML = ops.slice(0, 10).map((o, i) => `
+    <div class="acard">
+      <div class="acard-top">
+        <div>
+          <div class="acard-name">${i+1}. ${o.name}</div>
+          <div class="acard-meta">#${o.number} · ${o.buy_market} → ${o.sell_market}</div>
+        </div>
+        <div>
+          <div class="acard-pval">+${o.profit.toFixed(2)}</div>
+          <div class="acard-roi">+${o.roi.toFixed(1)}% ROI</div>
+        </div>
+      </div>
+      <div class="acard-rows">
+        <div class="acard-row"><span class="acard-rl">🛒 Купить (${o.buy_market})</span><span class="acard-rv">${o.buy_price.toFixed(2)} TON</span></div>
+        <div class="acard-row"><span class="acard-rl">💸 Продать (${o.sell_market})</span><span class="acard-rv">${o.sell_price.toFixed(2)} TON</span></div>
+        <div class="acard-row"><span class="acard-rl">Комиссии + газ</span><span class="acard-rv" style="color:var(--rose)">−${o.fees.toFixed(2)} TON</span></div>
+      </div>
+      <a href="${o.url || '#'}" target="_blank" class="acard-cta">🔗 Купить прямо сейчас</a>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+// KPIs  ← из реальных данных бота
+// ════════════════════════════════════════════
+function rKPI() {
+  const totalListings = Object.values(R.market_stats).reduce((s, m) => s + (m.total_listings || 0), 0);
+  document.getElementById('kv-lst').textContent = totalListings || '—';
+  document.getElementById('kv-arb').textContent = R.arbitrage.length || '—';
+  document.getElementById('kv-snp').textContent = '—'; // sniper hits — в памяти бота, не экспортируются
+  // notified_count из данных юзера
+  const ntf = R.user?.notified_count;
+  document.getElementById('kv-ntf').textContent = ntf != null ? ntf : '—';
+}
+
+// ════════════════════════════════════════════
+// MARKET STATUS  ← реальная статистика
+// ════════════════════════════════════════════
+function rMkt() {
+  const C = { Tonnel: 'var(--sky)', Portals: 'var(--lav)', MRKT: 'var(--amber)' };
+  const G = { Tonnel: 'rgba(77,184,255,.35)', Portals: 'rgba(180,122,255,.35)', MRKT: 'rgba(255,179,71,.35)' };
+  const now = Date.now() / 1000;
+
+  const markets = ['Tonnel','Portals','MRKT'];
+  const html = markets.map(n => {
+    const m = R.market_stats[n] || {};
+    const ago = m.last_update ? Math.round(now - m.last_update) : null;
+    const ok  = ago !== null && ago < 120;
+    const listings = m.total_listings || 0;
+    const avg = m.avg_price || 0;
+    return `<div class="mkt-i">
+      <div class="mkt-led" style="background:${ok ? C[n] : 'var(--t3)'};box-shadow:${ok ? '0 0 8px '+G[n] : 'none'}"></div>
+      <div class="mkt-nm" style="color:${C[n]}">${n}</div>
+      <div class="mkt-inf">
+        <div class="mkt-cnt">${listings ? listings + ' листингов' : 'Нет данных'}</div>
+        <div class="mkt-avg">${avg ? 'avg ' + avg.toFixed(1) + ' TON' : '—'}</div>
+      </div>
+      <div class="mkt-ts">${ago !== null ? ago + 's' : '—'}</div>
+    </div>`;
+  });
+  document.getElementById('mkt-list').innerHTML = html.join('');
+}
+
+// ════════════════════════════════════════════
+// HEATMAP  ← по реальным данным продаж (топ имён)
+// ════════════════════════════════════════════
+function rHmap() {
+  const el = document.getElementById('hmap');
+  if (!R.recent_sales.length) {
+    el.innerHTML = '<div class="empty-txt t3" style="grid-column:1/-1;font-size:12px;padding:20px 0;text-align:center">Нет данных о продажах</div>';
+    return;
+  }
+  // Считаем частоту продаж по имени подарка
+  const freq = {};
+  R.recent_sales.forEach(s => { freq[s.name] = (freq[s.name] || 0) + 1; });
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 9);
+  const max = sorted[0]?.[1] || 1;
+
+  el.innerHTML = sorted.map(([name, cnt]) => {
+    const h = cnt / max;
+    const r = Math.floor(20 + h * 210), g2 = Math.floor(220 * (1 - h * .6)), b = Math.floor(50 + h * 80);
+    const col = `rgb(${r},${g2},${b})`;
+    const shortName = name.split(' ')[0];
+    return `<div class="hcell" style="background:rgba(${r},${g2},${b},.1);border-color:rgba(${r},${g2},${b},.2)">
+      <div class="hcell-v" style="color:${col}">${cnt}</div>
+      <div class="hcell-n">${shortName}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// GIFT LIST  ← листинги из global_gift_cache бота
+//   (если бот добавит их в экспорт — покажем здесь)
+// ════════════════════════════════════════════
+function rGifts() {
+  const el = document.getElementById('gift-list');
+  // Если бот не экспортирует листинги — показываем арбитражные лоты как "найденные подарки"
+  const arb = R.arbitrage;
+  if (!arb.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">🎁</div><div class="empty-txt">Листинги обновляются<br>каждые 30 секунд</div></div>';
+    return;
+  }
+  el.innerHTML = arb.slice(0, 15).map(o => `
+    <div class="gcard gcard-a">
+      <div class="gcard-badge gcard-badge-a">ARB</div>
+      <div class="gcard-name">${o.name}</div>
+      <div class="gcard-row">
+        <span class="gcard-price">${o.buy_price.toFixed(2)} TON</span>
+        <span class="gcard-floor">Sell: ${o.sell_price.toFixed(2)} TON</span>
+        <span class="gcard-mkt">${o.buy_market}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+// SNIPER LIST  ← sniper алерты бот не экспортирует
+//   (они уходят в Telegram напрямую)
+// ════════════════════════════════════════════
+function rSnp() {
+  const el = document.getElementById('snp-list');
+  el.innerHTML = `<div class="card" style="border-color:rgba(255,94,122,.12);text-align:center;">
+    <div style="font-size:13px;color:var(--t2);line-height:1.8;padding:4px 0">
+      Sniper алерты приходят напрямую<br>в Telegram как уведомления.<br>
+      <span style="color:var(--rose)">Включи уведомления в боте</span>
+    </div>
+  </div>`;
+  document.getElementById('d-snp').classList.remove('on');
+}
+
+// ════════════════════════════════════════════
+// SALES  ← РЕАЛЬНЫЕ данные из R.recent_sales
+// ════════════════════════════════════════════
+function rSales() {
+  const el = document.getElementById('sales-list');
+  const banner = document.getElementById('sales-src-banner');
+  const sales = R.recent_sales;
+
+  if (!R.timestamp) {
+    banner.style.display = 'block';
+    banner.textContent = '⚠ Нет связи с ботом. Убедись что бот запущен.';
+    el.innerHTML = '<div class="empty"><div class="empty-ico">💰</div><div class="empty-txt">Ожидание данных от бота...</div></div>';
+    return;
+  }
+
+  banner.style.display = 'none';
+
+  if (!sales.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">💰</div><div class="empty-txt">Продаж пока нет.<br>Бот собирает данные с маркетов.</div></div>';
+    return;
+  }
+
+  const now = Date.now() / 1000;
+  el.innerHTML = sales.slice(-30).reverse().map((s, i) => {
+    // Время: бот кладёт поле timestamp (unix) или строку
+    let timeStr = '—';
+    if (s.timestamp) {
+      const diff = Math.round(now - s.timestamp);
+      timeStr = diff < 60 ? diff + 's' : diff < 3600 ? Math.floor(diff/60) + 'm' : Math.floor(diff/3600) + 'h';
+    } else if (s.time) {
+      timeStr = s.time;
+    }
+    const market = s.market || s.source || '—';
+    const price  = typeof s.price === 'number' ? s.price.toFixed(2) : (s.price || '—');
+    const name   = s.name || s.gift_name || '—';
+    const num    = s.number || s.num || '';
+    return `<div class="sitem" style="animation-delay:${i * 0.03}s">
+      <div class="sitem-ico">🎁</div>
+      <div class="sitem-body">
+        <div class="sitem-name">${name}</div>
+        <div class="sitem-meta">${market}${num ? ' · #' + num : ''}</div>
+      </div>
+      <div class="sitem-right">
+        <div class="sitem-price">${price} TON</div>
+        <div class="sitem-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// PORTFOLIO
+// ════════════════════════════════════════════
+function openM(id)  { document.getElementById(id).classList.add('on') }
+function closeM(id) { document.getElementById(id).classList.remove('on') }
+
+function addPort() {
+  const nm = document.getElementById('p-nm').value.trim();
+  const pr = +document.getElementById('p-pr').value;
+  if (!nm || !pr) { toast('⚠ Заполни название и цену', 'rose'); return; }
+  S.portfolio.push({
+    nm, num: document.getElementById('p-num').value || '—',
+    mkt: document.getElementById('p-mkt').value,
+    bp: pr, cur: pr, peak: pr,
+    rar: document.getElementById('p-rar').value || '?'
+  });
+  save(); closeM('m-port'); rPort(); toast('✓ Добавлено в портфель', 'mint');
+  ['p-nm','p-num','p-pr','p-rar'].forEach(id => document.getElementById(id).value = '');
+}
+function delPort(i) { S.portfolio.splice(i, 1); save(); rPort(); toast('Удалено'); }
+
+function rPort() {
+  const wrap = document.getElementById('pb-wrap');
+  const lst  = document.getElementById('port-list');
+  if (!S.portfolio.length) {
+    wrap.innerHTML = '';
+    lst.innerHTML  = '<div class="empty"><div class="empty-ico">📂</div><div class="empty-txt">Портфель пуст<br>Добавь подарки для отслеживания</div></div>';
+    return;
+  }
+  let inv = 0, val = 0;
+  S.portfolio.forEach(x => { inv += x.bp; val += x.cur; });
+  const profit = val - inv, pct = inv > 0 ? profit / inv * 100 : 0;
+  wrap.innerHTML = `<div class="port-banner">
+    <div class="port-profit ${profit >= 0 ? 'up' : 'dn'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)} TON</div>
+    <div class="port-sub">Прибыль · ${profit >= 0 ? '+' : ''}${pct.toFixed(1)}% · ${S.portfolio.length} подарков</div>
+    <div class="kgrid mt14">
+      <div class="kbox"><div class="kbox-v">${inv.toFixed(1)}</div><div class="kbox-l">Вложено</div></div>
+      <div class="kbox"><div class="kbox-v mint">${val.toFixed(1)}</div><div class="kbox-l">Сейчас</div></div>
+    </div></div>`;
+  lst.innerHTML = S.portfolio.map((x, i) => {
+    const p = x.cur - x.bp, r = x.bp > 0 ? p / x.bp * 100 : 0, pt = Math.min(Math.abs(r), 100);
+    return `<div class="pitem">
+      <div class="pitem-top">
+        <div>
+          <div class="pitem-name">${x.nm} <span style="color:var(--t3);font-weight:400;font-size:12px">#${x.num}</span></div>
+          <div class="pitem-sub">🏪 ${x.mkt} · 💎 ${x.rar}%</div>
+        </div>
+        <div>
+          <div class="pitem-pnl ${p >= 0 ? 'up' : 'dn'}">${p >= 0 ? '+' : ''}${p.toFixed(2)}</div>
+          <div class="pitem-pct" style="color:${p>=0?'var(--mint)':'var(--rose)'}">${r >= 0 ? '+' : ''}${r.toFixed(1)}%</div>
+        </div>
+      </div>
+      <div class="row" style="font-size:12px;color:var(--t3)">
+        <span>Куплено: <strong style="color:var(--t1)">${x.bp.toFixed(2)} TON</strong></span>
+        <button class="del-btn" onclick="delPort(${i})">✕</button>
+      </div>
+      <div class="pbar"><div class="pbar-f ${p >= 0 ? 'up' : 'dn'}" style="width:${pt}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// WATCHLIST
+// ════════════════════════════════════════════
+function addW() {
+  const n = document.getElementById('w-n').value.trim();
+  const p = +document.getElementById('w-p').value;
+  if (!n || !p) { toast('⚠ Заполни все поля', 'rose'); return; }
+  S.watchlist[n] = p; save();
+  document.getElementById('w-n').value = '';
+  document.getElementById('w-p').value = '';
+  rWatch(); toast('✓ Добавлено', 'mint');
+}
+function delW(n) { delete S.watchlist[n]; save(); rWatch(); }
+function rWatch() {
+  const el  = document.getElementById('w-list');
+  const ent = Object.entries(S.watchlist);
+  if (!ent.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">👁</div><div class="empty-txt">Watchlist пуст</div></div>';
+    return;
+  }
+  el.innerHTML = ent.map(([n, t]) => {
+    // Ищем реальный floor из market_stats или продаж
+    const salesOfGift = R.recent_sales.filter(s => (s.name || s.gift_name) === n);
+    const fl = salesOfGift.length ? Math.min(...salesOfGift.map(s => s.price)).toFixed(2) : null;
+    const ok = fl !== null && +fl <= t;
+    const d  = fl !== null ? ((+fl - t) / t * 100).toFixed(1) : null;
+    return `<div class="witem">
+      <div class="witem-dot" style="background:${fl===null ? 'var(--t3)' : ok ? 'var(--mint)' : 'var(--rose)'};box-shadow:0 0 8px ${ok?'rgba(45,255,160,.4)':'rgba(255,94,122,.3)'}"></div>
+      <div class="witem-body">
+        <div class="witem-name">${n}</div>
+        <div class="witem-meta">Цель: ${t.toFixed(2)} TON${fl !== null ? ' · Floor: ' + fl + ' · <span style="color:' + (ok?'var(--mint)':'var(--rose)') + '">' + (d>=0?'+':'') + d + '%</span>' : ' · Нет продаж'}</div>
+      </div>
+      <button class="del-btn" onclick="delW('${n.replace(/'/g,"\\'")}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// NUMBERS
+// ════════════════════════════════════════════
+const PRESETS = [1,7,77,100,111,123,321,500,777,888,1000,1234,4444,7777,9999];
+function addN() {
+  const v = +document.getElementById('inp-n').value;
+  if (!v || v < 1) { toast('⚠ Некорректный номер', 'rose'); return; }
+  if (S.numbers.includes(v)) { toast('Уже добавлен', 'rose'); return; }
+  S.numbers.push(v); S.numbers.sort((a,b) => a-b); save();
+  document.getElementById('inp-n').value = '';
+  rNums(); toast('✓ #' + v + ' добавлен', 'mint');
+}
+function delN(n) { S.numbers = S.numbers.filter(x => x !== n); save(); rNums(); }
+function addP(n) {
+  if (S.numbers.includes(n)) { toast('Уже есть', 'rose'); return; }
+  S.numbers.push(n); S.numbers.sort((a,b) => a-b); save(); rNums(); toast('✓ #'+n, 'mint');
+}
+function rNums() {
+  document.getElementById('nchips').innerHTML = !S.numbers.length
+    ? '<span style="font-size:13px;color:var(--t3)">Список пуст</span>'
+    : S.numbers.map(n => `<div class="nchip">#${n}<div class="nchip-x" onclick="delN(${n})">✕</div></div>`).join('');
+  document.getElementById('prow').innerHTML = PRESETS.map(n =>
+    `<div class="pchip${S.numbers.includes(n)?' used':''}" onclick="${S.numbers.includes(n)?'':('addP('+n+')')}">
+      #${n}${S.numbers.includes(n)?' ✓':''}
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+// WALLET
+// ════════════════════════════════════════════
+function connW() {
+  const a = document.getElementById('inp-w').value.trim();
+  if (!a.startsWith('EQ') && !a.startsWith('UQ')) { toast('⚠ Неверный TON адрес', 'rose'); return; }
+  S.wallet = a; save(); showWConn(); toast('💳 Подключён', 'mint');
+}
+function showWConn() {
+  document.getElementById('w-empty').style.display = 'none';
+  document.getElementById('w-conn').style.display  = 'block';
+  document.getElementById('w-addr-el').textContent = S.wallet.slice(0,10) + '...' + S.wallet.slice(-8);
+  // Баланс из данных юзера если есть
+  const bal = R.user?.balance;
+  document.getElementById('w-bal-el').textContent = bal != null ? bal.toFixed(2) : '—';
+  document.getElementById('w-nfts').innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:12px">Для NFT данных запусти /wallet в боте</div>';
+}
+function refW() { loadData(); toast('↺ Обновляю...', 'mint'); }
+function discW() {
+  S.wallet = ''; save();
+  document.getElementById('w-empty').style.display = 'block';
+  document.getElementById('w-conn').style.display  = 'none';
+  document.getElementById('inp-w').value = '';
+  toast('Кошелёк отключён');
+}
+
+// ════════════════════════════════════════════
+// RESET / MISC
+// ════════════════════════════════════════════
+function resetN() {
+  // Не сбрасываем счётчик локально — он в боте. Показываем подсказку.
+  toast('Сброс — через /reset в боте', 'mint');
+}
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+let _tt = null;
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'on' + (type ? ' ' + type : '');
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.className = '', 2600);
+}
+</script>
 </body>
 </html>
